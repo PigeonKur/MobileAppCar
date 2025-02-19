@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
 
 
+
 @Composable
 fun RegisterScreen(navController: NavController) {
         var email by remember { mutableStateOf("") }
@@ -31,6 +32,7 @@ fun RegisterScreen(navController: NavController) {
         var passwordTrust by remember { mutableStateOf("")}
         var name by remember { mutableStateOf("")}
         var isEmailValid by remember { mutableStateOf(true) }
+        var datebirth by remember { mutableStateOf("") }
 
 
     Column(
@@ -62,8 +64,11 @@ fun RegisterScreen(navController: NavController) {
             TextField(value = passwordTrust, onValueChange = {passwordTrust = it}, label = { Text("Введите пароль еще раз")},
                 visualTransformation = PasswordVisualTransformation()
             )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextField(value = datebirth, onValueChange = {datebirth = formatDateInput(it)}, label = { Text("Дата рождения")})
             if (passwordTrust != password){
-                Text("Пароли не свопадают", color = Color.Red)
+                Text("Пароли не совпадают", color = Color.Red)
             }
             else {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -82,5 +87,14 @@ fun RegisterScreen(navController: NavController) {
             }
         }
     }
+fun formatDateInput(input: String): String {
+    val digits = input.filter { it.isDigit() }
+    return when {
+        digits.length <= 2 -> digits
+        digits.length <= 4 -> "${digits.substring(0, 2)}.${digits.substring(2)}"
+        digits.length <= 8 -> "${digits.substring(0, 2)}.${digits.substring(2, 4)}.${digits.substring(4)}"
+        else -> "${digits.substring(0, 2)}.${digits.substring(2, 4)}.${digits.substring(4, 8)}"
+    }
+}
 
 
