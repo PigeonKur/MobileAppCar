@@ -27,12 +27,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.isPopupLayout
 import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
+import com.example.myapplication.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
+    var loginError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -63,12 +70,27 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (loginError != null) {
+            Text(loginError!!, color = Color.Red)
+        }
+
         Button(
             onClick = {
                 if (email.isEmailValid() && password.isNotEmpty()) {
-                    navController.navigate("home"){
-                        popUpTo("login") {
-                            inclusive = true
+                    CoroutineScope(Dispatchers.Main).launch {
+                        try {
+                            supabase.auth.signInWith(Email) {
+                                this.email = email
+                                this.password = password
+                            }
+
+                            navController.navigate("home") {
+                                popUpTo("login") {
+                                    inclusive = true
+                                }
+                            }
+                        } catch (e: Exception) {
+                            loginError = "Ошибка входа: ${e.message}"
                         }
                     }
                 }
