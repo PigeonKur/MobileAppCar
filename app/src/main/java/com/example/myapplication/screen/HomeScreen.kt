@@ -54,12 +54,14 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
             horizontalArrangement = Arrangement.End
         ) {
             Button(onClick = { navController.navigate("putForSale") }) {
-                Text(text = "Выставить на продажу")
+                Text(text = "Выставить в аренду")
             }
             Spacer(modifier = Modifier.padding(6.dp))
 
-            Image(painter = painterResource(id = R.drawable.profile), contentDescription = "Фото профиля",
-                modifier = Modifier.size(45.dp).clip(CircleShape).clickable{navController.navigate("profile")})
+            Image(painter = painterResource(id = R.drawable.profile),
+                contentDescription = "Профиль",
+                modifier = Modifier.size(45.dp).clip(CircleShape)
+                    .clickable { navController.navigate("profile") })
         }
 
         Spacer(modifier = Modifier.height(11.dp))

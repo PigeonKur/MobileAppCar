@@ -42,8 +42,8 @@ fun AppNavigator() {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("home") { HomeScreen(navController) }
-        composable("putForSale") {PutForSale()  }
-        composable("profile") {Profile()  }
+        composable("putForSale") {PutForSale(navController)  }
+        composable("profile") {Profile(navController)  }
     }
 }
 
