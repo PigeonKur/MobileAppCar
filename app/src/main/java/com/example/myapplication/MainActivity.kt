@@ -10,6 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.screen.HomeScreen
 import com.example.myapplication.screen.LoginScreen
+import com.example.myapplication.screen.Profile
+import com.example.myapplication.screen.PutForSale
 import com.example.myapplication.screen.RegisterScreen
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
@@ -39,7 +41,9 @@ fun AppNavigator() {
         composable("splash") { SplashScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
-        composable("home") { HomeScreen() }
+        composable("home") { HomeScreen(navController) }
+        composable("putForSale") {PutForSale()  }
+        composable("profile") {Profile()  }
     }
 }
 

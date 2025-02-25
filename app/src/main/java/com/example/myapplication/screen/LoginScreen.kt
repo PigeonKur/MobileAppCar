@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -34,12 +35,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var loginError by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -50,8 +53,10 @@ fun LoginScreen(navController: NavController) {
     ) {
         TextField(
             value = email,
-            onValueChange = {email = it
-                isEmailValid = email.isEmailValid()},
+            onValueChange = {
+                email = it
+                isEmailValid = email.isEmailValid()
+            },
             label = { Text("Email") },
             isError = !isEmailValid
         )
@@ -74,30 +79,34 @@ fun LoginScreen(navController: NavController) {
             Text(loginError!!, color = Color.Red)
         }
 
-        Button(
-            onClick = {
-                if (email.isEmailValid() && password.isNotEmpty()) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        try {
-                            supabase.auth.signInWith(Email) {
-                                this.email = email
-                                this.password = password
-                            }
-
-                            navController.navigate("home") {
-                                popUpTo("login") {
-                                    inclusive = true
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    if (email.isEmailValid() && password.isNotEmpty()) {
+                        isLoading = true
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                supabase.auth.signInWith(Email) {
+                                    this.email = email
+                                    this.password = password
                                 }
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                loginError = "Ошибка входа: ${e.message}"
+                            } finally {
+                                isLoading = false
                             }
-                        } catch (e: Exception) {
-                            loginError = "Ошибка входа: ${e.message}"
                         }
                     }
-                }
-            },
-            enabled = email.isEmailValid() && password.isNotEmpty()
-        ) {
-            Text("Войти")
+                },
+                enabled = email.isEmailValid() && password.isNotEmpty()
+            ) {
+                Text("Войти")
+            }
         }
 
         TextButton(onClick = { navController.navigate("register") }) {
