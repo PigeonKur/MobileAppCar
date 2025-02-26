@@ -63,8 +63,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.common)
     implementation(libs.androidx.navigation.compose)
-    implementation("androidx.compose.ui:ui:1.7.8")
-    implementation("androidx.compose.compiler:compiler:1.5.15")
+    implementation(libs.ui)
+    implementation(libs.androidx.compiler)
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.0"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
@@ -72,6 +72,9 @@ dependencies {
     implementation("io.ktor:ktor-client-android:3.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:3.1.0")
+
+
     implementation(libs.androidx.foundation.android)
 
 

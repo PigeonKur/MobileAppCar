@@ -1,6 +1,5 @@
 package com.example.myapplication.screen
 
-import android.text.TextUtils
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,12 +11,7 @@ import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
 import com.example.myapplication.supabase
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
-import java.time.format.DateTimeFormatter
-import io.github.jan.supabase.auth.Auth
-import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
