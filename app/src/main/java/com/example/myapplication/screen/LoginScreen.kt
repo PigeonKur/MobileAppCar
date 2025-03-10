@@ -26,10 +26,8 @@ import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
 import com.example.myapplication.supabase
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -39,6 +37,7 @@ fun LoginScreen(navController: NavController) {
     var isEmailValid by remember { mutableStateOf(true) }
     var loginError by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    val loginModel = LoginModel()
 
     Column(
         modifier = Modifier
@@ -80,24 +79,15 @@ fun LoginScreen(navController: NavController) {
         } else {
             Button(
                 onClick = {
-                    if (email.isEmailValid() && password.isNotEmpty()) {
-                        isLoading = true
-                        CoroutineScope(Dispatchers.Main).launch {
-                            try {
-                                supabase.auth.signInWith(Email) {
-                                    this.email = email
-                                    this.password = password
-                                }
-                                navController.navigate("home") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            } catch (e: Exception) {
-                                loginError = "Ошибка входа: ${e.message}"
-                            } finally {
-                                isLoading = false
-                            }
-                        }
-                    }
+                    loginModel.handleLogin(
+                        email = email,
+                        password = password,
+                        navController = navController,
+                        coroutineScope = CoroutineScope(Dispatchers.Main),
+                        auth = supabase.auth,
+                        onError = { loginError = it },
+                        onLoading = { isLoading = it }
+                    )
                 },
                 enabled = email.isEmailValid() && password.isNotEmpty()
             ) {
