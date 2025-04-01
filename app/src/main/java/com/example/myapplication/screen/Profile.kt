@@ -22,14 +22,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.myapplication.Models.User
+import com.example.myapplication.Models.Person
 import com.example.myapplication.R
 import com.example.myapplication.supabase
-import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.gotrue.auth
 
 @Composable
 fun Profile(navController: NavController) {
-    val currentUser = remember { mutableStateOf<User?>(null) }
+    val currentPerson = remember { mutableStateOf<Person?>(null) }
     val isLoading = remember { mutableStateOf(true) }
 
     val user = supabase.auth.currentUserOrNull()
@@ -38,14 +38,16 @@ fun Profile(navController: NavController) {
     LaunchedEffect(userMetadata) {
         if (userMetadata != null) {
             try {
-                val userData = User(
+                val userId = java.util.UUID.randomUUID()
+                val personData = Person(
+                    id = userId.toString(),
                     name = userMetadata["name"] as? String ?: "Неизвестно",
                     email = userMetadata["email"] as? String ?: "Не указан",
                     date_birth = userMetadata["date_birth"] as? String ?: "Не указана",
                     password = userMetadata["password"] as? String ?: "Не указан"
                 )
 
-                currentUser.value = userData
+                currentPerson.value = personData
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -80,12 +82,11 @@ fun Profile(navController: NavController) {
             isLoading.value -> {
                 Text(text = "Загрузка...", fontSize = 18.sp, color = Color.Gray)
             }
-            currentUser.value != null -> {
-                val user = currentUser.value!!
+            currentPerson.value != null -> {
+                val user = currentPerson.value!!
                 Text(text = user.name, fontSize = 20.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Дата рождения", color = Color.Gray, fontSize = 14.sp)
-                Text(text = user.date_birth, fontSize = 18.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Email", color = Color.Gray, fontSize = 14.sp)
                 Text(text = user.email, fontSize = 18.sp, color = Color.Black)

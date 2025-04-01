@@ -1,12 +1,13 @@
 package com.example.myapplication.screen
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -24,11 +25,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
-import com.example.myapplication.supabase
-import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -37,7 +35,7 @@ fun LoginScreen(navController: NavController) {
     var isEmailValid by remember { mutableStateOf(true) }
     var loginError by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    val loginModel = LoginModel()
+    val loginModel = remember { LoginModel() }
 
     Column(
         modifier = Modifier
@@ -53,10 +51,17 @@ fun LoginScreen(navController: NavController) {
                 isEmailValid = email.isEmailValid()
             },
             label = { Text("Email") },
-            isError = !isEmailValid
+            isError = !isEmailValid,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
+
         if (!isEmailValid) {
-            Text(text = "Некорректный email", color = Color.Red)
+            Text(
+                text = "Некорректный email",
+                color = Color.Red,
+                modifier = Modifier.align(Alignment.Start)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -65,17 +70,23 @@ fun LoginScreen(navController: NavController) {
             value = password,
             onValueChange = { password = it },
             label = { Text("Пароль") },
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (loginError != null) {
-            Text(loginError!!, color = Color.Red)
+            Text(
+                text = loginError!!,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
 
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.size(48.dp))
         } else {
             Button(
                 onClick = {
@@ -84,22 +95,32 @@ fun LoginScreen(navController: NavController) {
                         password = password,
                         navController = navController,
                         coroutineScope = CoroutineScope(Dispatchers.Main),
-                        auth = supabase.auth,
-                        onError = { loginError = it },
-                        onLoading = { isLoading = it }
+                        onError = { error ->
+                            loginError = error
+                        },
+                        onLoading = { loading ->
+                            isLoading = loading
+                        },
+                        onSuccess = {
+                            // Можно добавить дополнительные действия
+                            // например, сохранение данных пользователя
+                        }
                     )
                 },
-                enabled = email.isEmailValid() && password.isNotEmpty()
+                enabled = email.isEmailValid() && password.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Войти")
             }
         }
 
-        TextButton(onClick = { navController.navigate("register") }) {
-            Text("Регистрация")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(
+            onClick = { navController.navigate("register") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Нет аккаунта? Зарегистрируйтесь")
         }
     }
 }
-
-
-

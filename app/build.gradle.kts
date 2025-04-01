@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.serialization") version "1.9.0"
+
 }
 
 android {
@@ -65,21 +66,19 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ui)
     implementation(libs.androidx.compiler)
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.0"))
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:2.0.1"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:auth-kt")
-    implementation("io.github.jan-tennert.supabase:realtime-kt")
-    implementation("io.ktor:ktor-client-android:3.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt")
+    implementation("io.ktor:ktor-client-android:2.3.5")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:3.1.0")
 
 
     implementation(libs.androidx.foundation.android)
-
-
-
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

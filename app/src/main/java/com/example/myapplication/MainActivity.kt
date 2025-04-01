@@ -13,14 +13,14 @@ import com.example.myapplication.screen.LoginScreen
 import com.example.myapplication.screen.Profile
 import com.example.myapplication.screen.PutForSale
 import com.example.myapplication.screen.RegisterScreen
-import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 
 val supabase = createSupabaseClient(
     supabaseUrl = "https://mbtorrjppkvwjngctpya.supabase.co",
     supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1idG9ycmpwcGt2d2puZ2N0cHlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk1MjkxNjIsImV4cCI6MjA1NTEwNTE2Mn0.tafaHh11Mz7BMkVvrP2MgZ5rlWHuTfY2kStDRTM2jUY"
-) {
+){
     install(Postgrest)
     install(Auth)
 }
