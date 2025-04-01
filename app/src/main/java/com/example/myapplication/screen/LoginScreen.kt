@@ -1,5 +1,6 @@
 package com.example.myapplication.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.app.Person
 import androidx.navigation.NavController
 import com.example.myapplication.Methods.isEmailValid
+import com.example.myapplication.Models.UserManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -89,25 +93,26 @@ fun LoginScreen(navController: NavController) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
         } else {
             Button(
-                onClick = {
-                    loginModel.handleLogin(
-                        email = email,
-                        password = password,
-                        navController = navController,
-                        coroutineScope = CoroutineScope(Dispatchers.Main),
-                        onError = { error ->
-                            loginError = error
-                        },
-                        onLoading = { loading ->
-                            isLoading = loading
-                        },
-                        onSuccess = {
-                            // Можно добавить дополнительные действия
-                            // например, сохранение данных пользователя
-                        }
-                    )
-                },
-                enabled = email.isEmailValid() && password.isNotEmpty(),
+            onClick = {
+                loginModel.handleLogin(
+                    email = email,
+                    password = password,
+                    navController = navController,
+                    coroutineScope = CoroutineScope(Dispatchers.Main),
+                    onError = { error ->
+                        loginError = error
+                    },
+                    onLoading = { loading ->
+                        isLoading = loading
+                    },
+                    onSuccess = { user ->
+                        UserManager.setUser(user)
+                        Log.d("LoginScreen", "Пользователь сохранен: ${user.email}")
+                    }
+                )
+            },
+
+            enabled = email.isEmailValid() && password.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Войти")
@@ -124,3 +129,4 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
+

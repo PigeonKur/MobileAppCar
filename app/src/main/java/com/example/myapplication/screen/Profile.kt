@@ -1,5 +1,6 @@
 package com.example.myapplication.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,33 +25,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.Models.Person
+import com.example.myapplication.Models.UserManager
 import com.example.myapplication.R
 import com.example.myapplication.supabase
+import com.google.firebase.auth.FirebaseAuth
 import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 
 @Composable
 fun Profile(navController: NavController) {
-    val currentPerson = remember { mutableStateOf<Person?>(null) }
-    val isLoading = remember { mutableStateOf(true) }
+    val currentUser by UserManager.currentUser
+    val isLoading = remember { mutableStateOf(currentUser == null) }
 
-    val user = supabase.auth.currentUserOrNull()
-    val userMetadata = user?.userMetadata ?: emptyMap()
+    val authUser = supabase.auth.currentUserOrNull()
 
-    LaunchedEffect(userMetadata) {
-        if (userMetadata != null) {
+    LaunchedEffect(authUser) {
+        if (authUser != null) {
             try {
-                val userId = java.util.UUID.randomUUID()
-                val personData = Person(
-                    id = userId.toString(),
-                    name = userMetadata["name"] as? String ?: "Неизвестно",
-                    email = userMetadata["email"] as? String ?: "Не указан",
-                    date_birth = userMetadata["date_birth"] as? String ?: "Не указана",
-                    password = userMetadata["password"] as? String ?: "Не указан"
-                )
+                Log.d("Profile", "Текущий аутентифицированный пользователь: ${authUser.email}")
 
-                currentPerson.value = personData
+                if (currentUser == null) {
+                    val person = getPersonDataById(authUser.id)
+                    person?.let { UserManager.setUser(it) }  // Исправлено здесь
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("Profile", "Ошибка получения данных", e)
             } finally {
                 isLoading.value = false
             }
@@ -82,28 +83,41 @@ fun Profile(navController: NavController) {
             isLoading.value -> {
                 Text(text = "Загрузка...", fontSize = 18.sp, color = Color.Gray)
             }
-            currentPerson.value != null -> {
-                val user = currentPerson.value!!
-                Text(text = user.name, fontSize = 20.sp, color = Color.Black)
+            currentUser != null -> {
+                Text(text = currentUser!!.name, fontSize = 20.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Дата рождения", color = Color.Gray, fontSize = 14.sp)
+                Text(text = "Дата рождения: ${currentUser!!.date_birth}",
+                    color = Color.Gray, fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Email", color = Color.Gray, fontSize = 14.sp)
-                Text(text = user.email, fontSize = 18.sp, color = Color.Black)
+                Text(text = "Email: ${currentUser!!.email}",
+                    color = Color.Gray, fontSize = 14.sp)
             }
             else -> {
                 Text(text = "Данные не найдены", fontSize = 18.sp, color = Color.Red)
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { navController.navigate("home") }) {
-            Text(text = "Сохранить")
-        }
     }
 }
 
+suspend fun getPersonDataById(userId: String): Person? {
+    Log.d("Profile", "Поиск пользователя по ID: $userId")
+    return try {
+        supabase
+            .from("person")
+            .select {
+                filter {
+                    eq("id", userId)
+                }
+            }
+            .decodeSingleOrNull<Person>()
+            .also { person ->  // Исправлено здесь (заменили it на person)
+                Log.d("Profile", "Результат поиска: ${person?.toString() ?: "null"}")
+            }
+    } catch (e: Exception) {
+        Log.e("Profile", "Ошибка при поиске пользователя", e)
+        null
+    }
+}
 
 
 

@@ -138,7 +138,7 @@ fun RegisterScreen(
             }
             is ResultState.Success -> {
                 Text(
-                    "Регистрация успешна! Идёт перенаправление...",
+                    "Регистрация успешна!",
                     color = Color.Green
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -152,7 +152,7 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                viewModel.register() // Убрали колбэк отсюда
+                viewModel.register()
             },
             enabled = result !is ResultState.Loading && result !is ResultState.Success,
             modifier = Modifier.fillMaxWidth()
