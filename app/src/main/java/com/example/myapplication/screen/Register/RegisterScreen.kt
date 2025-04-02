@@ -1,7 +1,5 @@
-package com.example.myapplication.screen
+package com.example.myapplication.screen.Register
 
-import RegisterViewModel
-import ResultState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.Methods.formatDateInput
 import kotlinx.coroutines.delay
 
 
@@ -38,7 +37,7 @@ fun RegisterScreen(
     val result by viewModel.resultState.collectAsState()
 
     LaunchedEffect(result) {
-        println("Текущее состояние регистрации: $result")  // Отладка
+        println("Текущее состояние регистрации: $result")
 
         if (result is ResultState.Success) {
             delay(2000)
@@ -161,13 +160,3 @@ fun RegisterScreen(
         }
     }
 }
-fun formatDateInput(input: String): String {
-    val digits = input.filter { it.isDigit() }
-
-        return when (digits.length) {
-            8 -> "${digits.substring(4, 8)}-${digits.substring(2, 4)}-${digits.substring(0, 2)}"
-            6 -> "${digits.substring(0, 4)}-${digits.substring(4, 6)}"
-            4 -> digits
-            else -> input
-        }
-    }

@@ -1,4 +1,4 @@
-package com.example.myapplication.screen
+package com.example.myapplication.screen.Profile
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,14 +23,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.myapplication.Methods.getPersonDataById
 import com.example.myapplication.Models.Person
 import com.example.myapplication.Models.UserManager
 import com.example.myapplication.R
 import com.example.myapplication.supabase
-import com.google.firebase.auth.FirebaseAuth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
 
 @Composable
 fun Profile(navController: NavController) {
@@ -47,7 +45,7 @@ fun Profile(navController: NavController) {
 
                 if (currentUser == null) {
                     val person = getPersonDataById(authUser.id)
-                    person?.let { UserManager.setUser(it) }  // Исправлено здесь
+                    person?.let { UserManager.setUser(it) }
                 }
             } catch (e: Exception) {
                 Log.e("Profile", "Ошибка получения данных", e)
@@ -99,25 +97,7 @@ fun Profile(navController: NavController) {
     }
 }
 
-suspend fun getPersonDataById(userId: String): Person? {
-    Log.d("Profile", "Поиск пользователя по ID: $userId")
-    return try {
-        supabase
-            .from("person")
-            .select {
-                filter {
-                    eq("id", userId)
-                }
-            }
-            .decodeSingleOrNull<Person>()
-            .also { person ->  // Исправлено здесь (заменили it на person)
-                Log.d("Profile", "Результат поиска: ${person?.toString() ?: "null"}")
-            }
-    } catch (e: Exception) {
-        Log.e("Profile", "Ошибка при поиске пользователя", e)
-        null
-    }
-}
+
 
 
 

@@ -1,8 +1,5 @@
 package com.example.myapplication.Models
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.core.app.Person
 import kotlinx.serialization.Serializable
 
 @Serializable

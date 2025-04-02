@@ -1,4 +1,4 @@
-package com.example.myapplication.screen
+package com.example.myapplication.screen.Login
 
 import android.util.Log
 import androidx.navigation.NavController
@@ -15,9 +15,7 @@ class LoginModel {
         Log.d("LoginModel", "Поиск пользователя по email: $email")
         return try {
             val response = supabase.from("person")
-                .select() // Запрашиваем все поля
-
-            // Печатаем сам ответ от базы данных
+                .select()
             Log.d("LoginModel", "Ответ от Supabase: $response")
 
             val users = response.decodeList<Person>()
@@ -29,7 +27,6 @@ class LoginModel {
             null
         }
     }
-
     fun handleLogin(
         email: String,
         password: String,
@@ -58,7 +55,6 @@ class LoginModel {
                 } else {
                     Log.d("LoginModel", "Пользователь найден: ${user.email}")
 
-                    // Сравниваем пароли
                     if (user.password != password) {
                         Log.d("LoginModel", "Неверный пароль для email: $email")
                         onError("Неверный пароль")
@@ -70,7 +66,6 @@ class LoginModel {
                 }
             } catch (e: Exception) {
                 Log.e("LoginModel", "Ошибка при входе", e)
-                onError("Ошибка сети: ${e.message}")
             } finally {
                 onLoading(false)
             }

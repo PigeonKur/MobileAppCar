@@ -8,11 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.screen.HomeScreen
-import com.example.myapplication.screen.LoginScreen
-import com.example.myapplication.screen.Profile
-import com.example.myapplication.screen.PutForSale
-import com.example.myapplication.screen.RegisterScreen
+import com.example.myapplication.screen.Home.HomeScreen
+import com.example.myapplication.screen.Login.LoginScreen
+import com.example.myapplication.screen.Profile.Profile
+import com.example.myapplication.screen.PutForSale.PutForSale
+import com.example.myapplication.screen.Register.RegisterScreen
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
@@ -42,8 +42,8 @@ fun AppNavigator() {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("home") { HomeScreen(navController) }
-        composable("putForSale") {PutForSale(navController)  }
-        composable("profile") {Profile(navController)  }
+        composable("putForSale") { PutForSale(navController)  }
+        composable("profile") { Profile(navController)  }
     }
 }
 
