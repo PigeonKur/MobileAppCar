@@ -67,16 +67,18 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.androidx.compiler)
 
-    implementation(platform("io.github.jan-tennert.supabase:bom:2.0.1"))
+    implementation(platform("io.github.jan-tennert.supabase:bom:2.2.1"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:gotrue-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+
     implementation("io.ktor:ktor-client-android:2.3.5")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation("io.coil-kt:coil-compose:2.4.0")
-
+    implementation("androidx.compose.foundation:foundation:1.5.4")
 
     implementation(libs.androidx.foundation.android)
     implementation(libs.firebase.auth.ktx)

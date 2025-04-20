@@ -5,9 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.Methods.CarViewModelFactory
+import com.example.myapplication.screen.Home.CarViewModel
 import com.example.myapplication.screen.Home.HomeScreen
 import com.example.myapplication.screen.Login.LoginScreen
 import com.example.myapplication.screen.Profile.Profile
@@ -23,27 +26,40 @@ val supabase = createSupabaseClient(
 ){
     install(Postgrest)
     install(Auth)
+    install(io.github.jan.supabase.storage.Storage)
 }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val viewModelFactory = CarViewModelFactory(supabase)
+        val carViewModel = ViewModelProvider(this, viewModelFactory)[CarViewModel::class.java]
+
         setContent {
-            AppNavigator()
+            MyApp(carViewModel = carViewModel)
         }
     }
 }
 
 @Composable
-fun AppNavigator() {
+fun MyApp(carViewModel: CarViewModel) {
+    AppNavigator(carViewModel = carViewModel)
+}
+
+@Composable
+fun AppNavigator(carViewModel: CarViewModel) {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "splash") {
+
+    NavHost(
+        navController = navController,
+        startDestination = "splash"
+    ) {
         composable("splash") { SplashScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
-        composable("home") { HomeScreen(navController) }
-        composable("putForSale") { PutForSale(navController)  }
-        composable("profile") { Profile(navController)  }
+        composable("home") {HomeScreen(navController = navController,viewModel = carViewModel) }
+        composable("putForSale") { PutForSale(navController) }
+        composable("profile") { Profile(navController) }
     }
 }
 
