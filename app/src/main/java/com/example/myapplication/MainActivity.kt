@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.Methods.CarViewModelFactory
+import com.example.myapplication.screen.Home.EditCarScreen
 import com.example.myapplication.screen.Home.CarViewModel
 import com.example.myapplication.screen.Home.HomeScreen
 import com.example.myapplication.screen.Login.LoginScreen
@@ -58,6 +59,13 @@ fun AppNavigator(carViewModel: CarViewModel) {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("home") {HomeScreen(navController = navController,viewModel = carViewModel) }
+        composable("editCar/{carId}") { backStackEntry ->
+            EditCarScreen(
+                navController = navController,viewModel = carViewModel,
+                backStackEntry.arguments?.getString("carId")
+            )
+        }
+
         composable("putForSale") { PutForSale(navController) }
         composable("profile") { Profile(navController) }
     }

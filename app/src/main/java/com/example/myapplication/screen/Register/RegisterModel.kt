@@ -70,6 +70,16 @@ class RegisterViewModel : ViewModel() {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
 data class RegisterState(
     val name: String = "",
     val email: String = "",

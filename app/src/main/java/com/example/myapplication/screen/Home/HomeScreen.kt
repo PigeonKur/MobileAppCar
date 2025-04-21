@@ -46,14 +46,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.text.style.TextAlign
+import com.example.myapplication.Models.Car
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: CarViewModel
 ) {
-    var showMessage by remember { mutableStateOf(false) }
+    var showMessage by remember { mutableStateOf("") }
     val cars by viewModel.cars.collectAsState()
     val scope = rememberCoroutineScope()
 
@@ -63,7 +65,6 @@ fun HomeScreen(
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header with buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -72,7 +73,6 @@ fun HomeScreen(
                 Text("Выставить в аренду")
             }
             Spacer(modifier = Modifier.padding(6.dp))
-
             Image(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = "Профиль",
@@ -97,23 +97,35 @@ fun HomeScreen(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-               items(cars, key = { car -> car.imageUrl }) { car ->
+                items(cars, key = { car -> car.id }) { car ->
                     CarItem(
                         car = car,
                         onRentClick = {
                             viewModel.rentCar(car)
-                            showMessage = true
+                            showMessage = "Автомобиль арендован"
                             scope.launch {
                                 delay(3200)
-                                showMessage = false
+                                showMessage = ""
+                            }
+                        },
+                        onEditClick = {
+                            navController.navigate("editCar/${car.id}")
+                        },
+                        onDeleteClick = {
+                            viewModel.deleteCar(car)
+                            showMessage = "Автомобиль удален"
+                            scope.launch {
+                                delay(3200)
+                                showMessage = ""
                             }
                         }
                     )
                 }
             }
         }
+
         AnimatedVisibility(
-            visible = showMessage,
+            visible = showMessage.isNotEmpty(),
             enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
         ) {
@@ -124,7 +136,7 @@ fun HomeScreen(
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Text(
-                    "Автомобиль арендован",
+                    showMessage,
                     color = Color.Green,
                     textAlign = TextAlign.Center
                 )
@@ -137,7 +149,9 @@ fun HomeScreen(
 @Composable
 fun CarItem(
     car: Car,
-    onRentClick: () -> Unit
+    onRentClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -160,7 +174,7 @@ fun CarItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = car.name.replace("_", " "),
+                text = car.name,
                 fontSize = 18.sp
             )
             Text(
@@ -171,11 +185,40 @@ fun CarItem(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        // Кнопка аренды
         Button(
             onClick = onRentClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Арендовать автомобиль")
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        // Кнопки управления
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = onEditClick,
+                modifier = Modifier.weight(1f)
+                    .padding(end = 4.dp)
+            ) {
+                Text("Редактировать")
+            }
+
+            Button(
+                onClick = onDeleteClick,
+                modifier = Modifier.weight(1f)
+                    .padding(start = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Удалить")
+            }
         }
     }
 }
