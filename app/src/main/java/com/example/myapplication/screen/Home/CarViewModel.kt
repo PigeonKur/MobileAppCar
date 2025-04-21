@@ -53,13 +53,20 @@ class CarViewModel(private val supabase: SupabaseClient) : ViewModel() {
     fun deleteCar(car: Car) {
         viewModelScope.launch {
             try {
-                supabase.storage.from("cars").delete(car.id)
-                loadCars() // Перезагружаем список после удаления
+                supabase.from("car_data")
+                    .delete {
+                        filter {
+                            eq("id", car.id)
+                        }
+                    }
+                Log.d("CarViewModel", "Машина успешно удалена")
+                loadCars()
             } catch (e: Exception) {
-                println("Ошибка при удалении: ${e.message}")
+                Log.e("CarViewModel", "Ошибка при удалении: ${e.message}")
             }
         }
     }
+
     fun updateCar(carId: String, newName: String, newPrice: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
