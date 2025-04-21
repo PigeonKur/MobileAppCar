@@ -25,22 +25,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
+import com.example.myapplication.screen.Home.CarViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.Methods.CarViewModelFactory
+import com.example.myapplication.supabase
 
 @Composable
 fun PutForSale(navController: NavController) {
+    val context = LocalContext.current
+    val factory = CarViewModelFactory(supabase)
+    val carViewModel: CarViewModel = viewModel(factory = factory)
+
+
     var manufacturer by remember { mutableStateOf("") }
     var model by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent())
-    { uri: Uri? ->imageUri = uri    }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
+            uri: Uri? -> imageUri = uri
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -54,8 +65,13 @@ fun PutForSale(navController: NavController) {
             Image(
                 painter = imageUri?.let { rememberAsyncImagePainter(it) }
                     ?: painterResource(R.drawable.add_image),
-                contentDescription = "Selected Image", contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(300.dp).padding(30.dp).clickable { launcher.launch("image/*") }
+                contentDescription = "Selected Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .padding(30.dp)
+                    .clickable { launcher.launch("image/*") }
             )
         }
 
@@ -74,8 +90,29 @@ fun PutForSale(navController: NavController) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { navController.navigate("home") }) {
-            Text(text = "Выставить в аренду")
+        val context = LocalContext.current
+        val viewModel: AddViewModel = viewModel()
+
+        Button(onClick = {
+            viewModel.addCar(
+                manufacturer = manufacturer,
+                model = model,
+                price = price,
+                imageUri = imageUri,
+                context = context,
+                onSuccess = {
+                    carViewModel.loadCars()
+                    navController.navigate("home")
+                },
+                onError = { exception ->
+                    println("Error adding car: $exception")
+                }
+            )
+        }) {
+            Text("Выставить в аренду")
         }
+
+
+
     }
 }

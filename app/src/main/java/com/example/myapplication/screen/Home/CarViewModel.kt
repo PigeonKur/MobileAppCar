@@ -25,7 +25,7 @@ class CarViewModel(private val supabase: SupabaseClient) : ViewModel() {
         loadCars()
     }
 
-    private fun loadCars() {
+    fun loadCars() {
         Log.d("CarViewModel", "Загружаем автомобили...")
         viewModelScope.launch {
             try {
