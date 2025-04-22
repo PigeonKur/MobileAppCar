@@ -101,7 +101,6 @@ fun PutForSale(navController: NavController) {
                 imageUri = imageUri,
                 context = context,
                 onSuccess = {
-                    carViewModel.loadCars()
                     navController.navigate("home")
                 },
                 onError = { exception ->
@@ -111,8 +110,7 @@ fun PutForSale(navController: NavController) {
         }) {
             Text("Выставить в аренду")
         }
-
-
+        carViewModel.loadCars()
 
     }
 }

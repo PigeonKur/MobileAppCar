@@ -50,19 +50,61 @@ class CarViewModel(private val supabase: SupabaseClient) : ViewModel() {
         }
     }
 
-    fun deleteCar(car: Car) {
+    fun deleteCar(car: Car, onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
         viewModelScope.launch {
             try {
+                // 1. Логирование перед удалением
+                Log.d("CarViewModel", "Начинаем удаление машины ID: ${car.id}")
+                Log.d("CarViewModel", "Image URL: ${car.imageUrl}")
+
+                // 2. Удаляем запись из таблицы car_data
                 supabase.from("car_data")
                     .delete {
                         filter {
                             eq("id", car.id)
                         }
                     }
-                Log.d("CarViewModel", "Машина успешно удалена")
+                Log.d("CarViewModel", "Запись из car_data удалена")
+
+                // 3. Извлекаем путь к изображению
+                val imagePath = car.imageUrl?.let { url ->
+                    when {
+                        url.contains("storage/v1/object/public/cars/") ->
+                            url.substringAfter("storage/v1/object/public/cars/")
+                        url.contains("storage/v1/object/cars/") ->
+                            url.substringAfter("storage/v1/object/cars/")
+                        else -> url.substringAfterLast("/")
+                    }.also { path ->
+                        Log.d("CarViewModel", "Извлеченный путь к файлу: $path")
+                    }
+                }
+
+                // 4. Удаляем изображение из storage
+                imagePath?.let { path ->
+                    Log.d("CarViewModel", "Пытаемся удалить файл: $path")
+                    try {
+                        supabase.storage.from("cars").delete(path)
+                        Log.d("CarViewModel", "Файл успешно удален из storage")
+                    } catch (e: Exception) {
+                        Log.e("CarViewModel", "Ошибка при удалении файла", e)
+                        throw Exception("Ошибка удаления файла: ${e.message}")
+                    }
+                }
+
+                // 5. Обновляем список
                 loadCars()
+                onSuccess()
+
             } catch (e: Exception) {
-                Log.e("CarViewModel", "Ошибка при удалении: ${e.message}")
+                val errorMsg = when {
+                    e.message?.contains("row-level security") == true ->
+                        "Ошибка прав доступа. Проверьте RLS политики"
+                    e.message?.contains("not found") == true ->
+                        "Файл не найден в storage"
+                    else -> "Ошибка при удалении: ${e.message ?: "неизвестная ошибка"}"
+                }
+                Log.e("CarViewModel", errorMsg, e)
+                onError(errorMsg)
             }
         }
     }
