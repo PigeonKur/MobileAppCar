@@ -1,8 +1,10 @@
 package com.example.myapplication.screen.Home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -17,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -46,8 +50,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.ui.text.style.TextAlign
+import com.example.myapplication.Methods.CarCard
 import com.example.myapplication.Models.Car
 
 @Composable
@@ -58,53 +71,153 @@ fun HomeScreen(
     var showMessage by remember { mutableStateOf("") }
     val cars by viewModel.cars.collectAsState()
     val scope = rememberCoroutineScope()
+    var searchText by remember { mutableStateOf("") }
+    var isSearchVisible by remember { mutableStateOf(false) }
+    var isFiltersVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 9.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Button(onClick = { navController.navigate("putForSale") }) {
-                Text("Выставить в аренду")
-            }
-            Spacer(modifier = Modifier.padding(6.dp))
-            Image(
-                painter = painterResource(id = R.drawable.profile),
-                contentDescription = "Профиль",
+        // Поисковая строка
+        if (isSearchVisible) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                placeholder = { Text("Поиск...") },
+                trailingIcon = {
+                    IconButton(onClick = { viewModel.searchCars(searchText) }) {
+                        Icon(Icons.Default.Search, contentDescription = "Поиск")
+                    }
+                },
                 modifier = Modifier
-                    .size(45.dp)
-                    .clip(CircleShape)
-                    .clickable { navController.navigate("profile") }
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(11.dp))
+        // Верхняя панель
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
+                Icon(Icons.Default.Search, contentDescription = "Поиск")
+            }
 
+            Button(
+                onClick = { isFiltersVisible = !isFiltersVisible }
+            ) {
+                Text("Фильтры")
+            }
+
+            Button(
+                onClick = { navController.navigate("putForSale") },
+                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+            ) {
+                Text("Добавить")
+            }
+
+            IconButton(onClick = { navController.navigate("profile") }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Профиль",
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+
+        // Блок фильтров и сортировки
+        AnimatedVisibility(
+            visible = isFiltersVisible,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                // Сортировка
+                Text(
+                    "Сортировка:",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = viewModel.selectedSortOption == "price_asc",
+                        onClick = {
+                            viewModel.selectedSortOption = "price_asc"
+                            viewModel.sortCars(true)
+                        },
+                        label = { Text("Сначала недорогие") },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    FilterChip(
+                        selected = viewModel.selectedSortOption == "price_desc",
+                        onClick = {
+                            viewModel.selectedSortOption = "price_desc"
+                            viewModel.sortCars(false)
+                        },
+                        label = { Text("Сначала дорогие") }
+                    )
+                }
+
+                // Фильтр по производителю
+                Text(
+                    "Производитель:",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                )
+
+                LazyRow {
+                    items(viewModel.getUniqueManufacturers()) { manufacturer ->
+                        FilterChip(
+                            selected = viewModel.selectedManufacturer == manufacturer,
+                            onClick = {
+                                viewModel.selectedManufacturer =
+                                    if (viewModel.selectedManufacturer == manufacturer) null
+                                    else manufacturer
+                                viewModel.filterByManufacturer(viewModel.selectedManufacturer)
+                            },
+                            label = { Text(manufacturer) },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Список автомобилей
         if (cars.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Нет доступных автомобилей", color = Color.Gray)
+                Text("Нет доступных автомобилей", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(cars, key = { car -> car.id }) { car ->
-                    CarItem(
+                    CarCard(
                         car = car,
                         onRentClick = {
                             viewModel.rentCar(car)
-                            showMessage = "Автомобиль арендован"
                             scope.launch {
-                                delay(3200)
+                                // Показываем сообщение об успешной аренде
+                                showMessage = "Автомобиль ${car.name} арендован"
+                                delay(3000)
                                 showMessage = ""
                             }
                         },
@@ -112,47 +225,30 @@ fun HomeScreen(
                             navController.navigate("editCar/${car.id}")
                         },
                         onDeleteClick = {
-                            viewModel.deleteCar(car)
-                            showMessage = "Автомобиль удален"
-                            scope.launch {
-                                delay(3200)
-                                showMessage = ""
+                            viewModel.deleteCar(car) {
+                                scope.launch {
+                                    // Показываем сообщение об удалении
+                                    showMessage = "Автомобиль ${car.name} удален"
+                                    delay(3000)
+                                    showMessage = ""
+                                }
                             }
                         }
                     )
                 }
             }
         }
-
-        AnimatedVisibility(
-            visible = showMessage.isNotEmpty(),
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                Text(
-                    showMessage,
-                    color = Color.Green,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
     }
 }
 
 
-@Composable
-fun CarItem(
-    car: Car,
-    onRentClick: () -> Unit,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
-) {
+    @Composable
+    fun CarItem(
+        car: Car,
+        onRentClick: () -> Unit,
+        onEditClick: () -> Unit,
+        onDeleteClick: () -> Unit
+    ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -202,7 +298,7 @@ fun CarItem(
         ) {
             Button(
                 onClick = onEditClick,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1.2f)
                     .padding(end = 4.dp)
             ) {
                 Text("Редактировать")

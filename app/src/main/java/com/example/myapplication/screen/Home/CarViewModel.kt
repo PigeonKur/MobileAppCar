@@ -1,17 +1,16 @@
 package com.example.myapplication.screen.Home
 
 import android.util.Log
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.Models.Car
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
-import kotlinx.atomicfu.TraceBase.None.append
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +19,8 @@ import kotlinx.coroutines.launch
 class CarViewModel(private val supabase: SupabaseClient) : ViewModel() {
     private val _cars = MutableStateFlow<List<Car>>(emptyList())
     val cars: StateFlow<List<Car>> = _cars.asStateFlow()
+    var selectedSortOption by mutableStateOf("price_asc")
+    var selectedManufacturer by mutableStateOf<String?>(null)
 
     init {
         loadCars()
@@ -134,6 +135,66 @@ class CarViewModel(private val supabase: SupabaseClient) : ViewModel() {
 
             }
         }
+    }
+    fun searchCars(query: String) {
+        viewModelScope.launch {
+            try {
+                // Просто получаем все машины
+                val allCars = supabase.from("car_data")
+                    .select()
+                    .decodeList<Car>()
+
+                // Фильтруем локально если есть запрос
+                val result = if (query.isNotEmpty()) {
+                    val lowerQuery = query.lowercase()
+                    allCars.filter { car ->
+                        car.Manufacturer?.lowercase()?.contains(lowerQuery) == true ||
+                                car.name?.lowercase()?.contains(lowerQuery) == true
+                    }
+                } else {
+                    allCars
+                }
+
+                _cars.value = result
+                Log.d("CarViewModel", "Найдено машин: ${result.size}")
+            } catch (e: Exception) {
+                Log.e("CarViewModel", "Ошибка загрузки", e)
+            }
+        }
+    }
+
+    fun getUniqueManufacturers(): List<String> {
+        return cars.value
+            .mapNotNull { it.Manufacturer }
+            .distinct()
+            .sorted()
+    }
+
+    // Сортировка автомобилей
+    fun sortCars(ascending: Boolean) {
+        _cars.value = if (ascending) {
+            cars.value.sortedBy { it.price?.toIntOrNull() ?: 0 }
+        } else {
+            cars.value.sortedByDescending { it.price?.toIntOrNull() ?: 0 }
+        }
+    }
+
+    // Фильтрация по производителю
+    fun filterByManufacturer(manufacturer: String?) {
+        viewModelScope.launch {
+            if (manufacturer == null) {
+                loadCars() // Сброс фильтра
+            } else {
+                val allCars = supabase.from("car_data")
+                    .select()
+                    .decodeList<Car>()
+                _cars.value = allCars.filter { it.Manufacturer == manufacturer }
+            }
+        }
+    }
+
+    fun getManufacturers(): List<String> {
+        return cars.value.mapNotNull { it.Manufacturer }.distinct()
     }
 
 }

@@ -80,6 +80,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.compose.foundation:foundation:1.5.4")
 
+    implementation("io.ktor:ktor-client-core:2.3.0")
+
     implementation(libs.androidx.foundation.android)
     implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
