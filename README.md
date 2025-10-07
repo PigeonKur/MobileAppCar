@@ -66,7 +66,12 @@ fun searchCars(query: String) {
 
 ##  Интерфейс приложения
 
-![Главный экран](https://github.com/username/CarFinderApp/raw/main/images/main_screen.png)
+![Сплэш-экран при запуске приложения](https://github.com/user-attachments/assets/db92a25c-2ba2-4489-b14c-c8c73a2581d0)
+
+![Экран Логина](https://github.com/user-attachments/assets/e39750c3-92da-4cc9-b46d-93321fbae769)
+
+![Экран Регистрации](https://github.com/user-attachments/assets/0f8516bf-f3a5-48f4-8222-5568d6e076ef)
+
 
 ---
 
